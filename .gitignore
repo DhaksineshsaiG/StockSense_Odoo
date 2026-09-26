@@ -11,8 +11,7 @@ dist/
 build/
 
 # Prisma
-server/prisma/*.db
-server/prisma/*.db-journal
+# No local database files (using PostgreSQL)
 
 # IDE
 .vscode/
