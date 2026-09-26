@@ -12,6 +12,7 @@ import operationRoutes from './routes/operations';
 import ledgerRoutes from './routes/ledger';
 import categoryRoutes from './routes/categories';
 import reorderRuleRoutes from './routes/reorderRules';
+import locationRoutes from './routes/locations';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/warehouses', warehouseRoutes);
+app.use('/api/locations', locationRoutes);
 app.use('/api/operations', operationRoutes);
 app.use('/api/ledger', ledgerRoutes);
 app.use('/api/categories', categoryRoutes);
