@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Styles ────────────────────────────────────────────── */
+
+:root {
+  --color-bg: #f8fafc;
+  --color-sidebar: #0f172a;
+}
+
+body {
+  @apply bg-surface-50 text-surface-900 font-sans;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-400;
+}
+
+/* ─── Focus Rings ────────────────────────────────────────────── */
+
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary-500;
+}
+
+/* ─── Transitions ────────────────────────────────────────────── */
+
+.transition-default {
+  @apply transition-all duration-200 ease-in-out;
+}

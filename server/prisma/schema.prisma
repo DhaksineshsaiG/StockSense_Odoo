@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Authentication ──────────────────────────────────────────────
+
+model User {
+  id            String      @id @default(uuid())
+  name          String
+  email         String      @unique
+  passwordHash  String
+  role          String      @default("STAFF") // MANAGER | STAFF
+  otpCode       String?
+  otpExpiresAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  operations    Operation[] @relation("ResponsibleUser")
+  stockMoves    StockMove[] @relation("PerformedBy")
+}
+
+// ─── Warehouse & Locations ───────────────────────────────────────
+
+model Warehouse {
+  id         String              @id @default(uuid())
+  name       String
+  code       String              @unique // e.g. "WH"
+  address    String?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  locations  Location[]
+  operations Operation[]
+  sequences  OperationSequence[]
+}
+
+model Location {
+  id          String       @id @default(uuid())
+  warehouseId String
+  warehouse   Warehouse    @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  name        String
+  code        String       @unique // e.g. "WH/Stock", "WH/Rack-A"
+  type        String       @default("INTERNAL") // INTERNAL | VENDOR | CUSTOMER | INVENTORY_LOSS
+  createdAt   DateTime     @default(now())
+
+  stockQuants  StockQuant[]
+  fromMoves    StockMove[]  @relation("FromLocation")
+  toMoves      StockMove[]  @relation("ToLocation")
+  srcOps       Operation[]  @relation("SourceLocation")
+  destOps      Operation[]  @relation("DestLocation")
+  reorderRules ReorderRule[]
+}
+
+// ─── Products ────────────────────────────────────────────────────
+
+model ProductCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+
+  products    Product[]
+}
+
+model Product {
+  id         String           @id @default(uuid())
+  name       String
+  sku        String           @unique
+  barcode    String?
+  categoryId String?
+  category   ProductCategory? @relation(fields: [categoryId], references: [id])
+  uom        String           @default("Units") // kg, Units, Liters, Meters
+  costPrice  Float            @default(0.0)
+  salePrice  Float            @default(0.0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  stockQuants    StockQuant[]
+  reorderRules   ReorderRule[]
+  operationItems OperationItem[]
+  stockMoves     StockMove[]
+}
+
+// ─── Stock Tracking ──────────────────────────────────────────────
+
+model StockQuant {
+  id               String   @id @default(uuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locationId       String
+  location         Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  quantity         Float    @default(0.0) // On Hand
+  reservedQuantity Float    @default(0.0) // Reserved for ready deliveries
+  updatedAt        DateTime @updatedAt
+
+  @@unique([productId, locationId])
+}
+
+model ReorderRule {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locationId  String
+  location    Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  minQuantity Float    @default(0.0)
+  maxQuantity Float    @default(0.0)
+  createdAt   DateTime @default(now())
+
+  @@unique([productId, locationId])
+}
+
+// ─── Operations ──────────────────────────────────────────────────
+
+model OperationSequence {
+  id          String    @id @default(uuid())
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  type        String    // IN | OUT | INT | ADJ
+  nextNumber  Int       @default(1)
+
+  @@unique([warehouseId, type])
+}
+
+model Operation {
+  id               String          @id @default(uuid())
+  reference        String          @unique // e.g. "WH/IN/00001"
+  type             String          // RECEIPT | DELIVERY | INTERNAL_TRANSFER | ADJUSTMENT
+  status           String          @default("DRAFT") // DRAFT | WAITING | READY | DONE | CANCELED
+  warehouseId      String
+  warehouse        Warehouse       @relation(fields: [warehouseId], references: [id])
+  partnerName      String?         // Vendor (Receipt) or Customer (Delivery)
+  sourceLocationId String?
+  sourceLocation   Location?       @relation("SourceLocation", fields: [sourceLocationId], references: [id])
+  destLocationId   String?
+  destLocation     Location?       @relation("DestLocation", fields: [destLocationId], references: [id])
+  scheduledDate    DateTime?
+  completedDate    DateTime?
+  responsibleId    String?
+  responsible      User?           @relation("ResponsibleUser", fields: [responsibleId], references: [id])
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  items      OperationItem[]
+  stockMoves StockMove[]
+}
+
+model OperationItem {
+  id          String    @id @default(uuid())
+  operationId String
+  operation   Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  demandQty   Float
+  doneQty     Float     @default(0.0)
+  uom         String
+
+  @@index([operationId])
+}
+
+// ─── Stock Ledger (Immutable Audit Trail) ────────────────────────
+
+model StockMove {
+  id             String    @id @default(uuid())
+  reference      String    // Operation reference e.g. "WH/IN/00001"
+  operationId    String?
+  operation      Operation? @relation(fields: [operationId], references: [id])
+  productId      String
+  product        Product   @relation(fields: [productId], references: [id])
+  fromLocationId String?
+  fromLocation   Location? @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocationId   String?
+  toLocation     Location? @relation("ToLocation", fields: [toLocationId], references: [id])
+  quantity       Float
+  uom            String
+  type           String    // RECEIPT | DELIVERY | INTERNAL_TRANSFER | ADJUSTMENT
+  performedById  String?
+  performedBy    User?     @relation("PerformedBy", fields: [performedById], references: [id])
+  timestamp      DateTime  @default(now())
+
+  @@index([operationId])
+  @@index([productId])
+  @@index([timestamp])
+}
