@@ -2,45 +2,191 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base Styles ────────────────────────────────────────────── */
+/* ─── StockSense Brand: Deep Maroon + Ivory ──────────────────── */
+@layer base {
+  :root {
+    color-scheme: light;
+    --color-maroon: 74 14 26;       /* #4A0E1A */
+    --color-ivory: 248 245 239;     /* #F8F5EF */
+    --bg-primary: #F8F5EF;
+    --surface-glass: rgba(255, 253, 249, 0.72);
+    --border-glass: rgba(74, 14, 26, 0.08);
+  }
 
-:root {
-  --color-bg: #f8fafc;
-  --color-sidebar: #0f172a;
+  body {
+    background-color: #F3EEE6;
+    color: #3A1520;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
 }
 
-body {
-  @apply bg-surface-50 text-surface-900 font-sans;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+/* ─── Subtle Ambient Background ──────────────────────────────── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 10%, rgba(74, 14, 26, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(74, 14, 26, 0.03) 0%, transparent 50%),
+    linear-gradient(180deg, #F8F5EF 0%, #F0EBE1 50%, #E8E2D6 100%);
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────────── */
+.blob-1 {
+  position: absolute;
+  top: -12%;
+  left: 18%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(74, 14, 26, 0.04) 0%, transparent 70%);
+  filter: blur(100px);
+  border-radius: 50%;
+  animation: pulseBlob 16s ease-in-out infinite alternate;
+}
 
+.blob-2 {
+  position: absolute;
+  top: 45%;
+  right: -8%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(74, 14, 26, 0.03) 0%, transparent 70%);
+  filter: blur(110px);
+  border-radius: 50%;
+  animation: pulseBlob 20s ease-in-out infinite alternate-reverse;
+}
+
+.blob-3 {
+  position: absolute;
+  bottom: -10%;
+  left: 35%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(74, 14, 26, 0.025) 0%, transparent 70%);
+  filter: blur(120px);
+  border-radius: 50%;
+  animation: pulseBlob 24s ease-in-out infinite alternate;
+}
+
+@keyframes pulseBlob {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.1) translate(20px, -15px);
+    opacity: 1;
+  }
+}
+
+/* ─── Glassmorphism Components ───────────────────────────────── */
+@layer components {
+  /* Panel for topbar/sidebar/cards – warm ivory glass */
+  .glass-panel {
+    background: rgba(255, 253, 249, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(74, 14, 26, 0.06);
+    box-shadow: 0 1px 3px rgba(74, 14, 26, 0.04), 0 4px 24px -4px rgba(74, 14, 26, 0.06);
+  }
+
+  .glass-card {
+    background: rgba(255, 253, 249, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(74, 14, 26, 0.06);
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px rgba(74, 14, 26, 0.03), 0 8px 24px -6px rgba(74, 14, 26, 0.06);
+    transition: all 0.2s ease-in-out;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(74, 14, 26, 0.10);
+    box-shadow: 0 2px 4px rgba(74, 14, 26, 0.04), 0 12px 32px -6px rgba(74, 14, 26, 0.08);
+  }
+
+  /* Glass table container */
+  .glass-table-container {
+    background: rgba(255, 253, 249, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(74, 14, 26, 0.06);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+
+  .glass-input {
+    background: rgba(255, 253, 249, 0.65);
+    border: 1px solid rgba(74, 14, 26, 0.10);
+    color: #3A1520;
+    backdrop-filter: blur(8px);
+    transition: all 0.15s ease-in-out;
+  }
+
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(74, 14, 26, 0.35);
+    box-shadow: 0 0 0 3px rgba(74, 14, 26, 0.08);
+    outline: none;
+  }
+
+  .glass-input::placeholder {
+    color: #A69E90;
+  }
+
+  /* Shimmer effect for skeletons */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(74, 14, 26, 0.03) 0%,
+      rgba(74, 14, 26, 0.07) 50%,
+      rgba(74, 14, 26, 0.03) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerAnim 1.8s infinite;
+  }
+}
+
+@keyframes shimmerAnim {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ─── Scrollbars ─────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: rgba(74, 14, 26, 0.03);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-surface-300 rounded-full;
+  background: rgba(74, 14, 26, 0.12);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-400;
+  background: rgba(74, 14, 26, 0.22);
 }
 
-/* ─── Focus Rings ────────────────────────────────────────────── */
-
+/* ─── Focus Styles ───────────────────────────────────────────── */
 *:focus-visible {
-  @apply outline-2 outline-offset-2 outline-primary-500;
+  outline: 2px solid rgba(74, 14, 26, 0.4);
+  outline-offset: 2px;
 }
 
-/* ─── Transitions ────────────────────────────────────────────── */
-
-.transition-default {
-  @apply transition-all duration-200 ease-in-out;
+/* ─── Select dropdown option styling ─────────────────────────── */
+option {
+  background: #F8F5EF;
+  color: #3A1520;
 }
