@@ -43,3 +43,13 @@ export function optionalAuthMiddleware(req: AuthRequest, _res: Response, next: N
 
   next();
 }
+
+export function requireRole(...allowedRoles: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.userRole || !allowedRoles.includes(req.userRole)) {
+      res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+      return;
+    }
+    next();
+  };
+}

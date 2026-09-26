@@ -11,6 +11,7 @@ import warehouseRoutes from './routes/warehouses';
 import operationRoutes from './routes/operations';
 import ledgerRoutes from './routes/ledger';
 import categoryRoutes from './routes/categories';
+import reorderRuleRoutes from './routes/reorderRules';
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use('/api/warehouses', warehouseRoutes);
 app.use('/api/operations', operationRoutes);
 app.use('/api/ledger', ledgerRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/reorder-rules', reorderRuleRoutes);
 
 // ─── Error Handler ───────────────────────────────────────────────
 app.use(errorHandler);
